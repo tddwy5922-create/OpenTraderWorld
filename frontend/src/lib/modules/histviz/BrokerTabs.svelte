@@ -358,6 +358,14 @@
   const lever = (p) =>
     [p.leverage != null ? `${Number(p.leverage)}×` : '', p.margin_mode ? $t(`histviz.trade.marginMode.${p.margin_mode}`) : ''].filter(Boolean).join(' ') || '–';
   const leveraged = $derived(positions.some((p) => p.leverage != null || p.margin_mode));
+  // Where the venue would liquidate, and what carrying the position has cost so far. Both are
+  // read straight off the venue's position row; a venue that publishes neither shows "–".
+  const liq = (p) =>
+    Number(p.liquidation_price) > 0
+      ? fmtRow({ limit: p.market_price, avg_price: p.avg_price })(Number(p.liquidation_price))
+      : '–';
+  const marginRatio = (p) => (p.margin_ratio != null ? `${(Number(p.margin_ratio) * 100).toFixed(2)}%` : '–');
+  const funding = (p) => (p.funding_fee != null ? `${money(Number(p.funding_fee))} ${p.currency ?? ''}` : '–');
 
   // Position columns sized in mono `ch` to their full value plus a margin, from what only a
   // fill moves: a live tick never resizes them, and a narrow panel scrolls sideways instead.
@@ -376,7 +384,14 @@
       w($t('histviz.trade.pnl'), positions.map((p) => `${money(-999999.99)} ${p.currency ?? ''}`)),
       w($t('histviz.trade.opened'), positions.map(opened)),
       w($t('histviz.trade.fees'), positions.map(fee)),
-      ...(leveraged ? [w($t('histviz.trade.leverage'), positions.map(lever))] : []),
+      ...(leveraged
+        ? [
+            w($t('histviz.trade.leverage'), positions.map(lever)),
+            w($t('histviz.trade.liqPrice'), positions.map(liq)),
+            w($t('histviz.trade.marginRatio'), ['100.00%']),
+            w($t('histviz.trade.fundingFee'), positions.map((p) => `${money(-9999.99)} ${p.currency ?? ''}`))
+          ]
+        : []),
     ];
   });
 </script>
@@ -410,7 +425,11 @@
             <th class="n">{$t('histviz.trade.pnl')}</th>
             <th>{$t('histviz.trade.opened')}</th>
             <th class="n">{$t('histviz.trade.fees')}</th>
-            {#if leveraged}<th title={$t('histviz.trade.leverageHint')}>{$t('histviz.trade.leverage')}</th>{/if}
+            {#if leveraged}<th title={$t('histviz.trade.leverageHint')}>{$t('histviz.trade.leverage')}</th>
+              <th class="n" title={$t('histviz.trade.liqPriceHint')}>{$t('histviz.trade.liqPrice')}</th>
+              <th class="n" title={$t('histviz.trade.marginRatioHint')}>{$t('histviz.trade.marginRatio')}</th>
+              <th class="n" title={$t('histviz.trade.fundingFeeHint')}>{$t('histviz.trade.fundingFee')}</th>
+            {/if}
             <th class="acts"></th>
           </tr>
         </thead>
@@ -435,7 +454,11 @@
                     ? $t('histviz.trade.openedBefore', { days: 30 })
                     : ''}>{opened(p)}</td>
               <td class="n mono muted">{fee(p)}</td>
-              {#if leveraged}<td class="mono muted" title={$t('histviz.trade.leverageHint')}>{lever(p)}</td>{/if}
+              {#if leveraged}<td class="mono muted" title={$t('histviz.trade.leverageHint')}>{lever(p)}</td>
+                <td class="n mono">{liq(p)}</td>
+                <td class="n mono muted">{marginRatio(p)}</td>
+                <td class="n mono" class:buy={Number(p.funding_fee) > 0} class:sell={Number(p.funding_fee) < 0}>{funding(p)}</td>
+              {/if}
               <td class="acts">
                 <div>
                   {#if onprotectposition}
