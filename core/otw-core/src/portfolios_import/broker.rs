@@ -40,6 +40,48 @@ const DUST: f64 = 1e-12;
 /// Relative, because 0.00000001 BTC and 0.01 USDC are not the same kind of rounding.
 const TOLERANCE: f64 = 1e-9;
 
+// ── Positions ────────────────────────────────────────────────────────────────
+
+/// Add the account's open positions to what its balance sheet reports.
+///
+/// A balance cannot express a leveraged line: an OKX swap is neither owned nor a filled
+/// order, it exists only in the position list. Read alone, a 211 USD account shows up as
+/// 222 USDT of cash plus dust and both open swaps are missing.
+///
+/// A symbol the balance already reports wins. Where a venue answers both a balance and a
+/// position for the same instrument (a CFD over a stock that is also held), counting the
+/// two would double the line.
+pub fn add_positions(holdings: &mut Vec<Holding>, positions: &[crate::brokers::Position]) {
+    for p in positions {
+        let key = sym_key(&p.symbol);
+        if holdings.iter().any(|h| sym_key(&h.symbol) == key) {
+            continue;
+        }
+        // Units, not contracts: `multiplier` is the contract's size (100 shares for an
+        // equity option, a venue's own lot) and 1 when the broker already counted units.
+        let mult = if p.multiplier.is_finite() && p.multiplier > 0.0 {
+            p.multiplier
+        } else {
+            1.0
+        };
+        let qty = (p.qty * mult).abs();
+        if !qty.is_finite() || qty <= DUST {
+            continue;
+        }
+        holdings.push(Holding {
+            symbol: p.symbol.clone(),
+            name: p.symbol.clone(),
+            qty,
+            side: p.side.clone(),
+            asset_class: p.asset_class.clone(),
+            avg_price: p.avg_price.filter(|v| v.is_finite() && *v > 0.0),
+            currency: p.currency.clone(),
+            venue: p.venue.clone(),
+            account: p.account.clone(),
+        });
+    }
+}
+
 // ── Preview ──────────────────────────────────────────────────────────────────
 
 #[derive(Debug, Deserialize)]
@@ -453,12 +495,22 @@ pub async fn run_scheduled(
             .map(|s| sym_key(s))
             .collect();
     let http = crate::brokers::client()?;
-    let holdings: Vec<Holding> = connector
+    let mut holdings: Vec<Holding> = connector
         .holdings(&http, &settings)
         .await?
         .into_iter()
         .filter(|h| !excluded.contains(&sym_key(&h.symbol)))
         .collect();
+    // A balance sheet cannot show a leveraged line: the swaps the account has open are
+    // added from the position list, so a scheduled pass aligns them too.
+    if connector.capability().positions {
+        match connector.positions(&http, &settings).await {
+            Ok(positions) => add_positions(&mut holdings, &positions),
+            Err(e) => tracing::warn!(
+                "broker positions: {e:#} — aligning on the balance sheet alone"
+            ),
+        }
+    }
 
     let req = PreviewRequest {
         account_id,
@@ -596,5 +648,80 @@ mod tests {
         assert_eq!(fmt_qty(0.1), "0.1");
         assert_eq!(fmt_qty(1.0), "1");
         assert_eq!(fmt_qty(0.00000001), "0.00000001");
+    }
+
+    fn pos(symbol: &str, qty: f64, mult: f64, side: &str) -> crate::brokers::Position {
+        crate::brokers::Position {
+            symbol: symbol.into(),
+            side: side.into(),
+            qty,
+            avg_price: Some(0.029984),
+            fill_price: None,
+            currency: "USDT".into(),
+            asset_class: "crypto".into(),
+            multiplier: mult,
+            venue: "OKX".into(),
+            account: String::new(),
+            native_id: None,
+            market_price: None,
+            unrealized_pnl: Some(85.9),
+            opened_at: None,
+            entry_fee: None,
+            fee_currency: String::new(),
+            leverage: None,
+            margin_mode: None,
+        }
+    }
+
+    fn held(symbol: &str, qty: f64) -> Holding {
+        Holding {
+            symbol: symbol.into(),
+            name: symbol.into(),
+            qty,
+            side: "long".into(),
+            asset_class: "crypto".into(),
+            avg_price: None,
+            currency: "USDT".into(),
+            venue: "OKX".into(),
+            account: String::new(),
+        }
+    }
+
+    #[test]
+    fn an_open_swap_reaches_the_balance_sheet() {
+        let mut rows = vec![held("USDT", 222.6)];
+        add_positions(
+            &mut rows,
+            &[pos("CFX-USDT-SWAP", 25000.0, 1.0, "long")],
+        );
+        let cfx = rows.iter().find(|h| h.symbol == "CFX-USDT-SWAP").expect(
+            "a swap lives in the position list, not the balance, so it has to be added",
+        );
+        assert_eq!(cfx.qty, 25000.0);
+        assert_eq!(cfx.side, "long");
+        assert_eq!(cfx.avg_price, Some(0.029984), "the broker's cost basis is kept");
+        assert_eq!(rows.len(), 2);
+    }
+
+    #[test]
+    fn a_symbol_the_balance_already_reports_is_not_counted_twice() {
+        let mut rows = vec![held("CFX-USDT-SWAP", 25000.0)];
+        add_positions(&mut rows, &[pos("cfx-usdt-swap", 25000.0, 1.0, "long")]);
+        assert_eq!(rows.len(), 1, "case is not an identity");
+    }
+
+    #[test]
+    fn a_contract_multiplier_becomes_units() {
+        let mut rows = Vec::new();
+        add_positions(&mut rows, &[pos("BTC-USDT-SWAP", 3.0, 10.0, "short")]);
+        assert_eq!(rows[0].qty, 30.0);
+        assert_eq!(rows[0].side, "short");
+    }
+
+    #[test]
+    fn a_zero_position_is_not_a_line() {
+        let mut rows = Vec::new();
+        add_positions(&mut rows, &[pos("ETH-USDT-SWAP", 0.0, 1.0, "long")]);
+        assert!(rows.is_empty());
     }
 }

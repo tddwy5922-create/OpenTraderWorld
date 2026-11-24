@@ -115,10 +115,23 @@ async fn holdings_account(state: &AppState, account_id: Uuid) -> Result<Account,
 /// Read an account's holdings with its own credentials. Both halves go through here, so
 /// the grant is proved twice, and the commit works on the balance sheet the preview showed
 /// (a reading a few minutes old at most, see `brokers::cache`).
+///
+/// Positions are added on top of the balance: a leveraged line (an OKX swap) is not owned
+/// and has no fill in the window, so a balance-only reading leaves it out and the modal
+/// would offer nothing to align for the very lines the account is mostly made of.
 async fn read_holdings(
     (connector, settings, account): &Account,
 ) -> anyhow::Result<Vec<crate::brokers::Holding>> {
-    crate::brokers::cache::holdings(account.id, connector.as_ref(), settings).await
+    let mut rows = crate::brokers::cache::holdings(account.id, connector.as_ref(), settings).await?;
+    if connector.capability().positions {
+        match connector.positions(&crate::brokers::client()?, settings).await {
+            Ok(positions) => broker::add_positions(&mut rows, &positions),
+            Err(e) => tracing::warn!(
+                "broker positions: {e:#} — importing on the balance sheet alone"
+            ),
+        }
+    }
+    Ok(rows)
 }
 
 /// The alignment the user validated, written, and whatever a scheduled pass left waiting
