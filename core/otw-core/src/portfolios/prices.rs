@@ -282,6 +282,7 @@ async fn to_usd(pool: &PgPool, price: f64, currency: &str) -> Result<Option<f64>
 const BINANCE: &str = "https://api.binance.com";
 const KRAKEN: &str = "https://api.kraken.com";
 const COINBASE: &str = "https://api.exchange.coinbase.com";
+const OKX: &str = "https://www.okx.com";
 
 /// Binance last trade price, e.g. pair "BTCUSDT".
 pub async fn binance_price(pair: &str) -> Result<Option<f64>> {
@@ -312,6 +313,25 @@ pub async fn coinbase_price(product: &str) -> Result<Option<f64>> {
     let body: Value = crate::rate::send("coinbase", client()?.get(&url)).await.context("coinbase request")?.json().await.context("coinbase decode")?;
     Ok(body.get("price").and_then(Value::as_str).and_then(|s| s.parse::<f64>().ok()))
 }
+/// OKX last price, e.g. instId "BTC-USDT". A perpetual ("-SWAP") prices off the venue's mark,
+/// the same figure the venue liquidates and values the position at, so a book and a chart in
+/// this app never disagree about what a contract is worth.
+pub async fn okx_price(inst: &str) -> Result<Option<f64>> {
+    let swap = inst.ends_with("-SWAP");
+    let url = if swap {
+        format!("{OKX}/api/v5/public/mark-price?instId={}", urlencoding(inst))
+    } else {
+        format!("{OKX}/api/v5/market/ticker?instId={}", urlencoding(inst))
+    };
+    let body: Value = crate::rate::send("okx", client()?.get(&url)).await.context("okx request")?.json().await.context("okx decode")?;
+    // { "code": "0", "data": [ { "last": "..." } ] } — swaps answer under markPx instead.
+    let key = if swap { "markPx" } else { "last" };
+    Ok(body
+        .pointer(&format!("/data/0/{key}"))
+        .and_then(Value::as_str)
+        .and_then(|s| s.parse::<f64>().ok()))
+}
+
 
 /// Fetch the current USD spot for one asset, honoring a `spot_provider` override. Returns
 /// `Ok(None)` when the source has no price for the symbol (→ unresolved), `Err` on transport
@@ -325,6 +345,7 @@ async fn spot_for(
         Some("binance") => binance_price(&a.spot_symbol).await,
         Some("kraken") => kraken_price(&a.spot_symbol).await,
         Some("coinbase") => coinbase_price(&a.spot_symbol).await,
+        Some("okx") => okx_price(&a.spot_symbol).await,
         Some("yahoo") => stock_price_usd(pool, &a.spot_symbol).await,
         Some("coingecko") => Ok(crypto_prices(&[a.spot_symbol.clone()]).await?.get(&a.spot_symbol).copied()),
         // No override: price by the default provider the asset was resolved against.

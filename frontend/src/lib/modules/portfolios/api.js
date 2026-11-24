@@ -291,7 +291,8 @@ export const SPOT_SOURCES = {
     { id: 'coingecko', label: 'CoinGecko', hint: 'coin id (e.g. bitcoin)' },
     { id: 'binance', label: 'Binance', hint: 'pair (e.g. BTCUSDT)' },
     { id: 'kraken', label: 'Kraken', hint: 'pair (e.g. XBTUSDT)' },
-    { id: 'coinbase', label: 'Coinbase', hint: 'product (e.g. BTC-USD)' }
+    { id: 'coinbase', label: 'Coinbase', hint: 'product (e.g. BTC-USD)' },
+    { id: 'okx', label: 'OKX', hint: 'instId (e.g. BTC-USDT / BTC-USDT-SWAP)' }
   ],
   stock: [{ id: 'yahoo', label: 'Yahoo', hint: 'ticker (e.g. AAPL)' }],
   etf: [{ id: 'yahoo', label: 'Yahoo', hint: 'ticker (e.g. SPY)' }]
