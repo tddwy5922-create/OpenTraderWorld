@@ -1539,6 +1539,10 @@ mod tests {
             fee_currency: String::new(),
             leverage: None,
             margin_mode: None,
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+
         }
     }
 
