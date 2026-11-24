@@ -501,16 +501,11 @@ pub async fn run_scheduled(
         .into_iter()
         .filter(|h| !excluded.contains(&sym_key(&h.symbol)))
         .collect();
-    // A balance sheet cannot show a leveraged line: the swaps the account has open are
-    // added from the position list, so a scheduled pass aligns them too.
-    if connector.capability().positions {
-        match connector.positions(&http, &settings).await {
-            Ok(positions) => add_positions(&mut holdings, &positions),
-            Err(e) => tracing::warn!(
-                "broker positions: {e:#} — aligning on the balance sheet alone"
-            ),
-        }
-    }
+    // Only the balance sheet is imported. Open swaps stay out of it on purpose: a ledger of
+    // spot lots cannot hold a leveraged line — a short arrives as a negative quantity the
+    // ledger drops, and a position the venue sizes in contracts reads as a multiple of what
+    // was actually at risk. The live book is read straight from the venue instead (the
+    // dashboard's Broker book card, and the positions tab), so it stays true between imports.
 
     let req = PreviewRequest {
         account_id,
