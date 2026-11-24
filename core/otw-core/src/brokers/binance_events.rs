@@ -356,18 +356,8 @@ fn position_event(p: &PositionUpdate, currency: String, venue: &str, account: &s
             leverage: None,
             // `isolated` / `cross`, as the positions read writes `ISOLATED` / `CROSSED`.
             margin_mode: p.margin_type.as_deref().map(str::to_ascii_lowercase).map(|m| if m == "crossed" { "cross".into() } else { m }),
-        
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            },
-    
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
+        },
+    }
 }
 
 #[cfg(test)]
@@ -455,24 +445,14 @@ mod tests {
         // Source: USDⓈ-M ws-streams schema `accountUpdate`, its example values, then a short.
         let text = r#"{"e":"ACCOUNT_UPDATE","E":1564745798939,"T":1564745798938,"a":{"m":"ORDER","B":[],"P":[{"s":"BTCUSDT","pa":"-0.002","ep":"65000.5","bep":"0","cr":"200","up":"-1.5","mt":"isolated","iw":"0.00000000","ps":"BOTH"}]}}"#;
         match &events(&USDM, text)[..] {
-            [AccountEvent::Position { position: p 
-                liquidation_price: None,
-                margin_ratio: None,
-                funding_fee: None,
-                leverage: None,
-                margin_mode: None,}] => {
+            [AccountEvent::Position { position: p }] => {
                 assert_eq!((p.symbol.as_str(), p.side.as_str(), p.qty, p.avg_price), ("BTCUSDT", "short", 0.002, Some(65000.5)));
                 assert_eq!((p.native_id.as_deref(), p.currency.as_str(), p.unrealized_pnl, p.margin_mode.as_deref()), (Some("BTCUSDT"), "USDT", Some(-1.5), Some("isolated")));
             }
             other => panic!("{other:?}"),
         }
         let flat = text.replace(r#""pa":"-0.002""#, r#""pa":"0""#);
-        assert!(matches!(&events(&USDM, &flat)[..], [AccountEvent::Position { position 
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,}] if position.qty == 0.0 && position.avg_price.is_none()));
+        assert!(matches!(&events(&USDM, &flat)[..], [AccountEvent::Position { position }] if position.qty == 0.0 && position.avg_price.is_none()));
         let hedge = text.replace(r#""ps":"BOTH""#, r#""ps":"SHORT""#);
         assert!(matches!(&events(&USDM, &hedge)[..], [AccountEvent::Resync]));
     }

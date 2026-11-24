@@ -270,18 +270,8 @@ mod tests {
             fee_currency: String::new(),
             leverage: None,
             margin_mode: None,
-        
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
-    
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
+        }
+    }
 
     /// (journal, entry legs, exit legs, still open) per booked trade of the ticker, by entry.
     async fn booked(pool: &PgPool, ticker: &str) -> Vec<(Uuid, i32, i32, bool)> {

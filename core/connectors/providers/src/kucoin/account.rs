@@ -539,12 +539,7 @@ pub fn decode(book: Book, p: Pending, corr: CorrId, body: &[u8], sizes: &HashMap
                     // Already in the coin: one unit is one coin, not one contract.
                     multiplier: Some(Decimal::ONE),
                     name: None,
-                
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,});
+                });
             }
             let next = (coin + 1 < SETTLE_COINS.len()).then(|| (coin + 1).to_string());
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out), next)])

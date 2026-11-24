@@ -146,12 +146,7 @@ pub enum Operand {
     /// Live portfolio state, readable only inside a DCA run: "pnl_pct" | "since_last_buy_pct" |
     /// "avg_cost" | "units" | "value" | "weight_pct" | "cash_pct" | "drawdown_pct". Anywhere
     /// else it is undefined on every bar, so a signal referencing it never holds.
-    Position { field: String 
-        liquidation_price: None,
-        margin_ratio: None,
-        funding_fee: None,
-        leverage: None,
-        margin_mode: None,},
+    Position { field: String },
 }
 
 /// Embedded custom-indicator definitions for a run, keyed by indicator id. Strategy settings
@@ -4621,12 +4616,7 @@ fn operand_label(op: &Operand) -> String {
             None => format!("custom {id}"),
         },
         Operand::Metric { metric, .. } => format!("metric {metric}"),
-        Operand::Position { field 
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,} => format!("position {field}"),
+        Operand::Position { field } => format!("position {field}"),
     }
 }
 

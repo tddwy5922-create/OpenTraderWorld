@@ -57,12 +57,7 @@ enum Watch {
         entry_ts: String,
         stop: Option<(f64, String)>,
         limits: Vec<(f64, String)>,
-    
-        liquidation_price: None,
-        margin_ratio: None,
-        funding_fee: None,
-        leverage: None,
-        margin_mode: None,},
+    },
     /// A resting entry limit, and the size it is expected to fill with. An `anchor` limit has
     /// no price yet: it takes it from the first live price after its alert.
     Entry { long: bool, px: f64, qty: Option<f64>, anchor: Option<Anchor> },
@@ -93,12 +88,7 @@ fn filled_position(s: &Settings, f: &store::LiveFill, qty: f64, atr: Option<f64>
         entry_ts: f.at.format(&time::format_description::well_known::Rfc3339).unwrap_or_default(),
         stop: stop.map(|(x, r)| (x, r.to_string())),
         limits: tp.map(|x| (x, "take_profit".to_string())).into_iter().collect(),
-    
-        liquidation_price: None,
-        margin_ratio: None,
-        funding_fee: None,
-        leverage: None,
-        margin_mode: None,}
+    }
 }
 
 struct Running {
@@ -256,12 +246,7 @@ fn watches_for(
             entry_ts,
             stop,
             limits,
-        
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,});
+        });
     }
     let filled_entry = live.iter().filter(fresh).any(|f| f.kind == "entry" && f.ticker == ticker);
     for o in stats.get("pending_orders").and_then(Value::as_array).into_iter().flatten() {

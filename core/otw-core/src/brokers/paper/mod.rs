@@ -533,18 +533,8 @@ impl Holding {
             fee_currency: self.currency.clone(),
             leverage: None,
             margin_mode: None,
-        
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
-    
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
+        }
+    }
 }
 
 /// What the account holds, one line per instrument not flat, in the order first traded.

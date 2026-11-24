@@ -670,18 +670,8 @@ mod tests {
             fee_currency: String::new(),
             leverage: None,
             margin_mode: None,
-        
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
-    
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
+        }
+    }
 
     fn held(symbol: &str, qty: f64) -> Holding {
         Holding {

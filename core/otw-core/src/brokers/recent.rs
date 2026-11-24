@@ -211,18 +211,8 @@ mod tests {
             fee_currency: String::new(),
             leverage: None,
             margin_mode: None,
-        
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
-    
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            
-            }
+        }
+    }
 
     #[test]
     fn fills_of_one_order_merge_at_their_weighted_price() {

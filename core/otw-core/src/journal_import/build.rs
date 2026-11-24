@@ -791,9 +791,4 @@ impl Position {
             pnl_source: None,
         }
     }
-
-    liquidation_price: None,
-    margin_ratio: None,
-    funding_fee: None,
-    leverage: None,
-    margin_mode: None,}
+}

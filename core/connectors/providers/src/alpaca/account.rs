@@ -351,12 +351,7 @@ pub fn decode(p: Pending, corr: CorrId, frame: &RawFrame, body: &[u8], s: &mut S
                     class: None,
                     multiplier: None,
                     name: None,
-                
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,});
+                });
             }
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out), None)])
         }

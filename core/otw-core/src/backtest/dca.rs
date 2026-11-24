@@ -155,12 +155,7 @@ pub const SELL_KINDS: [&str; 4] = ["pct_position", "all", "units", "amount"];
 /// nothing said so, which is worse than a refusal.
 fn check_operand(o: &Operand, rule: &str) -> Option<String> {
     match o {
-        Operand::Position { field 
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,} if pos_field_index(field).is_none() => Some(format!(
+        Operand::Position { field } if pos_field_index(field).is_none() => Some(format!(
             "dca: {rule} reads an unknown portfolio field \"{field}\" ({})",
             POS_FIELDS.join("|")
         )),
@@ -496,12 +491,7 @@ struct Cond {
 
 fn resolve_src(op: &Operand, b: &Bars, defs: &Defs) -> Src {
     match op {
-        Operand::Position { field 
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,} => match pos_field_index(field) {
+        Operand::Position { field } => match pos_field_index(field) {
             Some(i) => Src::Pos(i),
             None => Src::Void,
         },
@@ -2302,12 +2292,7 @@ mod tests {
                     500.0,
                     true,
                     vec![Signal {
-                        left: Operand::Position { field: "pnl_pct".into() 
-                            liquidation_price: None,
-                            margin_ratio: None,
-                            funding_fee: None,
-                            leverage: None,
-                            margin_mode: None,},
+                        left: Operand::Position { field: "pnl_pct".into() },
                         op: Op::Below,
                         right: Some(Operand::Const { value: -10.0 }),
                     }],
@@ -2599,12 +2584,7 @@ mod tests {
             50.0,
             true,
             vec![Signal {
-                left: Operand::Position { field: "pnl".into() 
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,},
+                left: Operand::Position { field: "pnl".into() },
                 op: Op::Below,
                 right: Some(Operand::Const { value: -10.0 }),
             }],

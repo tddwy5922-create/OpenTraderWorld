@@ -176,12 +176,7 @@ impl IbkrGatewayBroker {
                         leverage: None,
                         margin_mode: None,
                         account,
-                    
-                        liquidation_price: None,
-                        margin_ratio: None,
-                        funding_fee: None,
-                        
-                        });
+                    });
                 }
             }
         }
@@ -283,18 +278,8 @@ fn position_of(p: &IbPosition) -> Position {
         fee_currency: String::new(),
         leverage: None,
         margin_mode: None,
-    
-        liquidation_price: None,
-        margin_ratio: None,
-        funding_fee: None,
-        
-        }
-
-        liquidation_price: None,
-        margin_ratio: None,
-        funding_fee: None,
-        
-        }
+    }
+}
 
 /// IB's status word as the book's: `None` for an order still working.
 fn done_status(ib: &str) -> Option<String> {
@@ -318,12 +303,7 @@ struct Followed {
 fn account_event(e: &events::Event, seen: &mut Followed) -> Option<AccountEvent> {
     match e {
         events::Event::Resync => Some(AccountEvent::Resync),
-        events::Event::Position(p) => Some(AccountEvent::Position { position: position_of(p) 
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,}),
+        events::Event::Position(p) => Some(AccountEvent::Position { position: position_of(p) }),
         events::Event::Order(u) => match u.as_ref() {
             // A margin what-if echoes as an open order; it was never placed.
             OrderUpdate::OpenOrder(d) if d.order.what_if => None,
@@ -725,12 +705,7 @@ mod tests {
         c.contract_id = 730283085;
         c.multiplier = "2".into();
         let p = IbPosition { account: "DU123".into(), contract: c, position: -3.0, average_cost: 39752.5 };
-        let Some(AccountEvent::Position { position 
-            liquidation_price: None,
-            margin_ratio: None,
-            funding_fee: None,
-            leverage: None,
-            margin_mode: None,}) = account_event(&events::Event::Position(std::sync::Arc::new(p)), &mut Followed::default()) else { panic!("not a position") };
+        let Some(AccountEvent::Position { position }) = account_event(&events::Event::Position(std::sync::Arc::new(p)), &mut Followed::default()) else { panic!("not a position") };
         assert_eq!((position.side.as_str(), position.qty, position.avg_price), ("short", 3.0, Some(19876.25)));
         assert_eq!((position.native_id.as_deref(), position.account.as_str(), position.market_price), (Some("730283085"), "DU123", None));
     }
