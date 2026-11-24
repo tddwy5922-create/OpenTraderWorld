@@ -207,27 +207,38 @@
   // Every dashboard that could sit in Workspace: the seeded presets first, then the
   // user's own pages. Before the document answers, the presets alone keep the rail whole.
   const workspaceCandidates = $derived.by(() => {
+    // `labelOf` reads the locale store imperatively (get(locale)), so a $derived that only
+    // calls it has no reactive link to the pack. Reading $locale here makes the rail follow
+    // the language switch instead of freezing on whatever locale was live at first paint.
+    void $locale;
     const pages = railDoc?.pages ?? [];
     const seen = new Set();
     const out = [];
     for (const preset of DASHBOARD_PRESETS) {
       const saved = pages.find((p) => p.id === preset.id);
       seen.add(preset.id);
-      out.push({ id: preset.id, name: saved?.tag || saved?.name || preset.name, icon: PRESET_ICONS[preset.id] ?? 'grid' });
+      out.push({
+        id: preset.id,
+        name: labelOf(saved?.tag || saved?.name || preset.name),
+        icon: PRESET_ICONS[preset.id] ?? 'grid'
+      });
     }
     for (const p of pages) {
       if (seen.has(p.id) || isDashboardPreset(p.id)) continue;
-      out.push({ id: p.id, name: p.tag || p.name, icon: 'grid' });
+      out.push({ id: p.id, name: labelOf(p.tag || p.name), icon: 'grid' });
     }
     return out;
   });
 
   // Candidate tools: every installed module that isn't the dashboard itself.
-  const toolCandidates = $derived(
-    visibleModules($installedIds)
+  const toolCandidates = $derived.by(() => {
+    // Same reactive-coupling note as workspaceCandidates: the module `name` is a getter that
+    // resolves through labelOf, so the list has to recompute when the locale pack arrives.
+    void $locale;
+    return visibleModules($installedIds)
       .filter((module) => !module.home)
-      .map((module) => ({ id: module.id, name: module.name, icon: module.icon, base: module.base }))
-  );
+      .map((module) => ({ id: module.id, name: labelOf(module.name), icon: module.icon, base: module.base }));
+  });
 
   // A section's entries: the saved arrangement filtered to what still exists, else the
   // section default. `max` is Infinity for an uncapped section.
