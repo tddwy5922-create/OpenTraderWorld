@@ -377,8 +377,7 @@ async fn execute(state: &AppState, account: &accounts::BrokerRow, s: &Settings, 
             liquidation_price: None,
             margin_ratio: None,
             funding_fee: None,
-            leverage: None,
-            margin_mode: None,
+
         },
     };
     publish(o.account_id, AccountEvent::Position { position });
