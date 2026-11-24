@@ -585,3 +585,6 @@ pub async fn list_usernames(pool: &PgPool) -> anyhow::Result<Vec<String>> {
             .context("listing usernames")?;
     Ok(rows.into_iter().map(|r| r.0).collect())
 }
+
+// NOTE: sqlx::migrate! embeds the migration list at compile time; adding a new file to
+// migrations/ only takes effect after this crate is recompiled.
