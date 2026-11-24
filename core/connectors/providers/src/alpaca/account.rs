@@ -342,6 +342,11 @@ pub fn decode(p: Pending, corr: CorrId, frame: &RawFrame, body: &[u8], s: &mut S
                 out.push(Position {
                     currency: settles_in(&id, s),
                     instrument: id,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                     qty: Qty(if p.side == "short" { -qty } else { qty }),
                     avg_price: positive(p.avg_entry_price),
                     unrealized_pnl: p.unrealized_pl.0.map(Money),

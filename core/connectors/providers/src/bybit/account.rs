@@ -476,6 +476,11 @@ pub fn decode(category: Category, venue: &'static str, p: Pending, corr: CorrId,
                             (Some(q), Some(f)) => (q, f, Some("USD".to_string())),
                             _ => return Err(ConnectorError::decode(format!("bybit order realtime: inverse order {} names no price to count its coins", o.order_id))),
                         }
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                     }
                     Category::Linear => (qty, filled, Some(SETTLE[settle].to_string())),
                     _ => (qty, filled, None),

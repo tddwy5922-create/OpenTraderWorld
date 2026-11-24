@@ -649,6 +649,11 @@ pub fn decode(book: Book, p: Pending, corr: CorrId, body: &[u8], sizes: &HashMap
                             class: None,
                             multiplier: None,
                         });
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                     }
                     next_spot(cur, n, from_ms, symbols.len())?
                 }

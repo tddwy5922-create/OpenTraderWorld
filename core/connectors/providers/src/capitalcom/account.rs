@@ -272,6 +272,11 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                 }
                 out.push(Position {
                     instrument: id(&m.epic),
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                     qty: Qty(if p.direction.eq_ignore_ascii_case("sell") { -size } else { size }),
                     avg_price: positive(&p.level).map(Price),
                     unrealized_pnl: p.upl.0.map(Money),

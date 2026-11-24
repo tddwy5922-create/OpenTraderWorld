@@ -701,6 +701,11 @@ pub fn decode(book: Book, p: Pending, base: &'static str, corr: CorrId, body: &[
                     account: None,
                     venue: None,
                     class: None,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             let next = if n >= LIST_PAGE { (offset as usize + n).to_string() } else { format!("{COND_CURSOR}0") };

@@ -496,6 +496,11 @@ impl Mapper for NinjaTrader {
                         if r.to <= r.from {
                             return Err(ConnectorError::invalid("the period ends before it starts"));
                         }
+                            liquidation_price: None,
+                            margin_ratio: None,
+                            funding_fee: None,
+                            leverage: None,
+                            margin_mode: None,
                     }
                     _ => {}
                 }

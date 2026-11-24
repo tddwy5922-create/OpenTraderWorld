@@ -243,6 +243,11 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_>) -> Result
                 }
                 out.push(Position {
                     instrument: id(&p.symbol),
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                     qty: Qty(if p.long_short.eq_ignore_ascii_case("short") { -qty } else { qty }),
                     avg_price: positive(p.average_price),
                     unrealized_pnl: p.unrealized.0.map(Money),

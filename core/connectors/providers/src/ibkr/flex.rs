@@ -507,6 +507,11 @@ impl Mapper for IbkrFlex {
                                 ConnectorError::invalid(format!("unknown time zone `{t}` on this broker account: use a name like Europe/Paris or America/New_York"))
                             })?;
                             (0, Some(tz))
+                            liquidation_price: None,
+                            margin_ratio: None,
+                            funding_fee: None,
+                            leverage: None,
+                            margin_mode: None,
                         }
                     },
                 };
