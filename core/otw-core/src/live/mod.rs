@@ -567,7 +567,9 @@ pub async fn run_feed<F: Feed>(mut feed: F, opening: &[Instrument]) -> Result<Li
                         if write.send(Message::Ping(Vec::new().into())).await.is_err() { return; }
                         pinged_at = Some(tokio::time::Instant::now());
                     }
-                    continue;
+                    // Deliberately no `continue`: falling through keeps the frames queued below
+                    // on the wire. A silent market is exactly when a venue's own application
+                    // keepalive has to go out, or the protocol idle timer tears the socket down.
                 }
                 msg = read.next() => {
                     if matches!(msg, Some(Ok(_))) {

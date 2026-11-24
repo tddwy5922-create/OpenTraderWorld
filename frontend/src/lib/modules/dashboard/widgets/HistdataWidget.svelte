@@ -51,13 +51,18 @@
 
   const queue = $derived.by(() => {
     const c = { queued: 0, running: 0, failed: 0, waiting: 0 };
-    for (const j of jobs ?? []) if (j.status in c) c[j.status]++;
+    // The store writes `error`; the card has always counted `failed`. Map it here, or the
+    // failure tally stays at zero however many downloads broke.
+    for (const j of jobs ?? []) {
+      if (j.status === 'error' || j.status === 'partial') c.failed++;
+      else if (j.status in c) c[j.status]++;
+    }
     return c;
   });
   const queueTotal = $derived((jobs ?? []).length);
   const parked = $derived((jobs ?? []).filter((j) => j.status === 'waiting' && j.resume_at));
   const failed = $derived(
-    (jobs ?? []).filter((j) => j.status === 'failed')
+    (jobs ?? []).filter((j) => j.status === 'error' || j.status === 'failed')
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .slice(0, limit)
   );
