@@ -334,12 +334,7 @@ pub enum AccountEvent {
     },
     /// A position as it now stands, without the figures only a full read gives (mark, result,
     /// entry). A zero `qty` means flat: the book drops it.
-    Position { position: Position 
-    liquidation_price: None,
-    margin_ratio: None,
-    funding_fee: None,
-    leverage: None,
-    margin_mode: None,},
+    Position { position: Position },
     /// Events may have been missed: read the book again.
     Resync,
 }
