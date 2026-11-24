@@ -576,14 +576,35 @@ const NAME_SUFFIXES: &[&str] = &[
     "holdings", "group", "trust", "etf", "the",
 ];
 
-/// The two title patterns one row counts on: the ticker as a whole word (case-sensitive,
-/// tickers are written in capitals) and the name without its legal form (case-insensitive,
-/// whole words; empty when nothing distinctive is left). A one-letter ticker is not matched
-/// on its own: "A" is in every headline.
+/// Whether a term is written in a script that does not put spaces between words. Chinese,
+/// Japanese and Korean headlines run the whole clause together, so a word-boundary pattern
+/// would only match a term that stands alone on the line — which never happens.
+fn spaceless(term: &str) -> bool {
+    term.chars().any(|c| {
+        matches!(c as u32, 0x3400..=0x4DBF | 0x4E00..=0x9FFF | 0xF900..=0xFAFF | 0x3040..=0x30FF | 0xAC00..=0xD7AF)
+    })
+}
+
+/// `term` as a title pattern: bounded on both sides for a Latin term (a bare `app` would
+/// match "apps"), unbounded for a spaceless script where the boundary never exists.
+fn bounded(term: &str) -> String {
+    let esc = re_escape(term);
+    if spaceless(term) {
+        esc
+    } else {
+        format!("\\m{esc}\\M")
+    }
+}
+
+/// The two title patterns one row counts on: the ticker as a whole word when it is written in
+/// a spaced script (tickers are Latin and in capitals), and the name without its legal form
+/// (case-insensitive; unbounded when the name is Chinese, where no word boundary exists).
+/// Empty when nothing distinctive is left. A one-letter ticker is not matched on its own:
+/// "A" is in every headline.
 pub fn news_patterns(symbol: &str, name: &str) -> (String, String) {
     let sym = symbol.trim();
     let sym_re = if sym.chars().count() >= 2 {
-        format!("\\m{}\\M", re_escape(sym))
+        bounded(sym)
     } else {
         String::new()
     };
@@ -593,8 +614,10 @@ pub fn news_patterns(symbol: &str, name: &str) -> (String, String) {
         .filter(|w| !NAME_SUFFIXES.contains(&w.to_lowercase().as_str()))
         .collect();
     let core = words.join(" ");
-    let name_re = if core.chars().count() >= 3 && !core.eq_ignore_ascii_case(sym) {
-        format!("\\m{}\\M", re_escape(&core))
+    // Two CJK characters are a company ("苹果"); three Latin letters are a word ("App").
+    let floor = if spaceless(&core) { 2 } else { 3 };
+    let name_re = if core.chars().count() >= floor && !core.eq_ignore_ascii_case(sym) {
+        bounded(&core)
     } else {
         String::new()
     };
@@ -670,6 +693,11 @@ mod tests {
 
     #[test]
     fn news_patterns_escape_regex_characters() {
+        // Chinese headlines have no spaces: a bounded pattern would never fire.
+        let (_, n) = news_patterns("600519", "贵州茅台");
+        assert_eq!(n, "贵州茅台");
+        let (_, n) = news_patterns("AAPL", "苹果");
+        assert_eq!(n, "苹果");
         let (s, _) = news_patterns("BRK.B", "Berkshire Hathaway Inc.");
         assert_eq!(s, "\\mBRK\\.B\\M");
         let (_, n) = news_patterns("XYZ", "X (Y) + Z");
