@@ -176,6 +176,11 @@ impl IbkrGatewayBroker {
                         leverage: None,
                         margin_mode: None,
                         account,
+                        liquidation_price: None,
+                        margin_ratio: None,
+                        funding_fee: None,
+                        leverage: None,
+                        margin_mode: None,
                     });
                 }
             }
@@ -278,6 +283,9 @@ fn position_of(p: &IbPosition) -> Position {
         fee_currency: String::new(),
         leverage: None,
         margin_mode: None,
+        liquidation_price: None,
+        margin_ratio: None,
+        funding_fee: None,
     }
 }
 

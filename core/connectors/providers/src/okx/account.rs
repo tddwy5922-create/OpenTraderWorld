@@ -527,7 +527,7 @@ fn rows(p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_>, terms: &Terms) 
                     avg_price: positive(p.avg_px),
                     unrealized_pnl: p.upl.0.map(Money),
                     currency: Some(p.ccy).filter(|c| !c.is_empty()),
-                    mark_price: None,
+                    mark_price: positive(p.mark_px),
                     venue: None,
                     account: None,
                     class: None,

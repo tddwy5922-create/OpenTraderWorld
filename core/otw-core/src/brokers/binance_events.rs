@@ -356,6 +356,11 @@ fn position_event(p: &PositionUpdate, currency: String, venue: &str, account: &s
             leverage: None,
             // `isolated` / `cross`, as the positions read writes `ISOLATED` / `CROSSED`.
             margin_mode: p.margin_type.as_deref().map(str::to_ascii_lowercase).map(|m| if m == "crossed" { "cross".into() } else { m }),
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            leverage: None,
+            margin_mode: None,
         },
     }
 }
