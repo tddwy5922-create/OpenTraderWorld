@@ -349,7 +349,12 @@ impl Job {
                             class: Some(c.class),
                             multiplier: Some(c.multiplier),
                             name: None,
-                        }
+                        
+                            liquidation_price: None,
+                            margin_ratio: None,
+                            funding_fee: None,
+                            leverage: None,
+                            margin_mode: None,}
                     })
                     .collect(),
             ),

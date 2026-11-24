@@ -374,9 +374,19 @@ async fn execute(state: &AppState, account: &accounts::BrokerRow, s: &Settings, 
             fee_currency: o.currency.clone(),
             leverage: None,
             margin_mode: None,
-        },
+        
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            
+            },
     };
-    publish(o.account_id, AccountEvent::Position { position });
+    publish(o.account_id, AccountEvent::Position { position 
+        liquidation_price: None,
+        margin_ratio: None,
+        funding_fee: None,
+        leverage: None,
+        margin_mode: None,});
     Ok(())
 }
 

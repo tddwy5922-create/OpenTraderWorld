@@ -211,6 +211,15 @@ pub struct Position {
     /// "cross" | "isolated", when the venue margins each instrument one way or the other.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub margin_mode: Option<String>,
+    /// Where the venue would liquidate this position, when it publishes one.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub liquidation_price: Option<f64>,
+    /// Maintenance margin ratio the venue reports (0..1), when it does.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub margin_ratio: Option<f64>,
+    /// Funding paid (positive) or received (negative) while the position has been open.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub funding_fee: Option<f64>,
 }
 
 /// What the broker says of an order sent under a client id, asked when the answer to its
@@ -325,7 +334,12 @@ pub enum AccountEvent {
     },
     /// A position as it now stands, without the figures only a full read gives (mark, result,
     /// entry). A zero `qty` means flat: the book drops it.
-    Position { position: Position },
+    Position { position: Position 
+    liquidation_price: None,
+    margin_ratio: None,
+    funding_fee: None,
+    leverage: None,
+    margin_mode: None,},
     /// Events may have been missed: read the book again.
     Resync,
 }

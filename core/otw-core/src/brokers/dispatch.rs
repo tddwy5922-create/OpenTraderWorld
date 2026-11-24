@@ -609,8 +609,18 @@ mod tests {
             fee_currency: String::new(),
             leverage: None,
             margin_mode: None,
-        }
-    }
+        
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            
+            }
+    
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            
+            }
 
     /// The review's case: long 10,000 USD on an inverse book, sell 30,000 USD at 100,000. In one
     /// unit the order flips the position to short 20,000 USD: it does not reduce, so the gate

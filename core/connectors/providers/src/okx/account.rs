@@ -260,6 +260,25 @@ struct PositionRow {
     upl: OptDec,
     #[serde(default)]
     ccy: String,
+    /// The venue's mark for the instrument: the price a position is valued and liquidated at.
+    #[serde(default)]
+    mark_px: OptDec,
+    /// The price the venue would liquidate this position at (empty on a cross position with
+    /// no liquidation price).
+    #[serde(default)]
+    liq_px: OptDec,
+    /// Leverage the position runs at.
+    #[serde(default)]
+    lever: OptDec,
+    /// "cross" | "isolated".
+    #[serde(default)]
+    mgn_mode: String,
+    /// Maintenance margin ratio the venue reports for the position.
+    #[serde(default)]
+    mgn_ratio: OptDec,
+    /// Funding paid (negative) or received (positive) while the position has been open.
+    #[serde(default)]
+    funding_fee: OptDec,
 }
 
 #[derive(Deserialize)]
@@ -514,6 +533,11 @@ fn rows(p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_>, terms: &Terms) 
                     class: None,
                     multiplier: coins.then_some(Decimal::ONE),
                     name: None,
+                    liquidation_price: positive(p.liq_px),
+                    margin_ratio: p.mgn_ratio.0,
+                    funding_fee: p.funding_fee.0.map(Money),
+                    leverage: p.lever.0,
+                    margin_mode: Some(p.mgn_mode).filter(|m: &String| !m.is_empty()),
                 });
             }
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out), None)])

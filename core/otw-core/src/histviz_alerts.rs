@@ -448,7 +448,12 @@ impl Probe {
                 "up_from_low" => "rise from low (%)".into(),
                 _ => metric.clone(),
             },
-            Operand::Position { field } => field.clone(),
+            Operand::Position { field 
+                liquidation_price: None,
+                margin_ratio: None,
+                funding_fee: None,
+                leverage: None,
+                margin_mode: None,} => field.clone(),
         }
     }
 }

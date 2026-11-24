@@ -458,7 +458,12 @@ pub fn decode(category: Category, venue: &'static str, p: Pending, corr: CorrId,
                     class: (category == Category::Option).then_some(AssetClass::Option),
                     multiplier: None,
                     name,
-                });
+                
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,});
             }
             vec![chunk(ctx, corr, AccountItems::Positions(out), next_walk(category, settle, page.result.next_page_cursor))]
         }

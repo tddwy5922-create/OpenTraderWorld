@@ -1475,8 +1475,18 @@ mod tests {
             unrealized_pct: None,
             strategy_id: None,
             strategy: String::new(),
-        }
-    }
+        
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            leverage: None,
+            margin_mode: None,}
+    
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            
+            }
 
     /// A deterministic daily close series, `n` bars.
     fn closes(n: usize, f: impl Fn(usize) -> f64) -> Vec<(OffsetDateTime, f64)> {

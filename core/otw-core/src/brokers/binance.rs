@@ -1539,8 +1539,18 @@ mod tests {
             fee_currency: String::new(),
             leverage: None,
             margin_mode: None,
-        }
-    }
+        
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            
+            }
+    
+            liquidation_price: None,
+            margin_ratio: None,
+            funding_fee: None,
+            
+            }
 
     #[test]
     fn a_resting_entrys_bracket_needs_a_position_in_its_direction() {

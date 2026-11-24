@@ -250,6 +250,22 @@ pub struct Position {
     /// description).
     #[serde(default)]
     pub name: Option<String>,
+    /// Price at which the venue would liquidate this position, when it publishes one. The
+    /// one number a leveraged position is judged by.
+    #[serde(default)]
+    pub liquidation_price: Option<Price>,
+    /// Maintenance margin ratio the venue reports for the position (0..1), when it does.
+    #[serde(default)]
+    pub margin_ratio: Option<rust_decimal::Decimal>,
+    /// Funding paid (positive) or received (negative) while the position has been open.
+    #[serde(default)]
+    pub funding_fee: Option<Money>,
+    /// Leverage the venue applies to this position, when it sets one per position.
+    #[serde(default)]
+    pub leverage: Option<rust_decimal::Decimal>,
+    /// "cross" | "isolated", when the venue margins this position one way or the other.
+    #[serde(default)]
+    pub margin_mode: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

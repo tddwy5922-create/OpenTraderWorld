@@ -679,7 +679,12 @@ impl<M: Mapper + Clone> Broker for NativeBroker<M> {
                 leverage: None,
                 margin_mode: None,
                 symbol: p.instrument.native,
-            });
+            
+                liquidation_price: None,
+                margin_ratio: None,
+                funding_fee: None,
+                
+                });
         }
         out.sort_by(|a, b| a.symbol.cmp(&b.symbol));
         Ok(out)

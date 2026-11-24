@@ -309,7 +309,12 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_>) -> Result
                         class: None,
                         multiplier: None,
                         name: None,
-                    });
+                    
+                        liquidation_price: None,
+                        margin_ratio: None,
+                        funding_fee: None,
+                        leverage: None,
+                        margin_mode: None,});
                 }
             }
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out), None)])
