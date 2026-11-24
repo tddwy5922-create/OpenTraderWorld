@@ -433,6 +433,18 @@ export const WIDGETS = [
     loader: () => import('./WebhooksWidget.svelte')
   },
   {
+    type: 'brokerbook',
+    label: 'Broker book',
+    icon: 'briefcase',
+    moduleId: 'histviz',
+    defaultSpan: 6,
+    blurb: 'Open positions with leverage, unrealized PnL, liquidation price and funding.',
+    variants: [
+      { id: 'book', label: 'Open positions', subtitle: 'Live book with liquidation and funding', size: 'MR', defaults: { limit: 8 } }
+    ],
+    loader: () => import('./BrokerBookWidget.svelte')
+  },
+  {
     type: 'histdata',
     label: 'Historical data',
     icon: 'database',

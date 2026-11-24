@@ -77,7 +77,8 @@
   "Community Docs": "社区文档",
   "Quant tools": "量化工具",
   "Tax calculator": "税务计算器",
-  "Resources": "资源"
+  "Resources": "资源",
+  "Broker book": "实盘持仓"
  },
  "widget_blurbs": {
   "A note or heading — markdown-lite text you write yourself.": "自定义笔记或标题，支持轻量 Markdown 文本。",
@@ -111,7 +112,8 @@
   "Saved community references, their categories, recent additions and quick access.": "已收藏的社区参考资料、分类汇总、近期新增及快速访问入口。",
   "Available data, risk and drawdown, correlations, seasonality, realized volatility and market regimes.": "可用数据、风险与回撤、相关性、季节性、已实现波动率及市场状态。",
   "Estimated tax for the year, the effective-rate trend, and a year-over-year table.": "年度预估税额、实际税率趋势及同比对照表。",
-  "Bookmarks, counts per category, entries needing work, and top domains.": "书签列表、各分类数量、待完善条目及高频域名。"
+  "Bookmarks, counts per category, entries needing work, and top domains.": "书签列表、各分类数量、待完善条目及高频域名。",
+  "Open positions with leverage, unrealized PnL, liquidation price and funding.": "当前持仓：杠杆、未实现盈亏、强平价、资金费"
  },
  "variant_labels": {
   "Account Sync Status": "账户同步状态",
@@ -452,6 +454,7 @@
   "Upcoming agenda": "近期日程",
   "Urgency buckets": "紧急度分组",
   "Win rate / profit factor": "胜率 / 盈利因子",
-  "Workspace size": "工作区大小"
+  "Workspace size": "工作区大小",
+  "Live book with liquidation and funding": "实时持仓，含强平价与资金费"
  }
 }
