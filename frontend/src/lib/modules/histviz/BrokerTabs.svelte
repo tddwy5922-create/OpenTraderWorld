@@ -370,7 +370,14 @@
   // Position columns sized in mono `ch` to their full value plus a margin, from what only a
   // fill moves: a live tick never resizes them, and a narrow panel scrolls sideways instead.
   const posCols = $derived.by(() => {
-    const w = (head, vals) => Math.max(head.length, ...vals.map((v) => String(v).length)) + 2;
+    // `ch` is the advance of "0", and a CJK glyph is about twice that: counting code points
+    // measured every Chinese header as half its width and squeezed the column it named.
+    const wide = (v) =>
+      [...String(v)].reduce(
+        (n, c) => n + (/[\u1100-\u115f\u2e80-\u4dcf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe6f\uff00-\uff60\uffe0-\uffe6]/.test(c) ? 2 : 1),
+        0
+      );
+    const w = (head, vals) => Math.max(wide(head), ...vals.map(wide)) + 2;
     const avg = positions.map((p) => (Number(p.avg_price) > 0 ? fmtRow({ limit: p.market_price, avg_price: p.avg_price })(Number(p.avg_price)) : ''));
     return [
       ...(many ? [w($t('histviz.trade.account'), positions.map((p) => nameOf(p.accountId)))] : []),

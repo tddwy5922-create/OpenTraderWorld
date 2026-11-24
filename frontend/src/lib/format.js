@@ -32,6 +32,7 @@
  */
 import { derived } from 'svelte/store';
 import { locale, LOCALES, t as tr } from '$lib/i18n';
+import { tz } from '$lib/tz.svelte.js';
 
 /**
  * Active UI language as a BCP-47 tag, kept in sync with the i18n store. This module is
@@ -40,6 +41,20 @@ import { locale, LOCALES, t as tr } from '$lib/i18n';
 let intlLocale = 'en';
 locale.subscribe((code) => {
   intlLocale = LOCALES.find((l) => l.code === code)?.html ?? code;
+});
+
+/**
+ * Every date and time this app prints is drawn in the zone picked in Settings → Defaults
+ * (`tz.value`), not the browser's. Timestamps arrive as instants from venues that stamp
+ * whatever offset they please, so reading them in one fixed zone is what keeps a chart
+ * axis and a table row from showing two different clocks.
+ */
+const zoneOpts = () => ({ timeZone: tz.value });
+
+/** Chinese reads 24-hour time; other locales keep their own convention. */
+const clockOpts = () => ({
+  ...zoneOpts(),
+  ...(/^zh/i.test(intlLocale) ? { hour12: false } : {})
 });
 
 /** The one "no value" glyph. U+2014. */
@@ -73,7 +88,13 @@ const SYMBOLS = {
   CHF: 'CHF ',
   CAD: 'C$',
   AUD: 'A$',
-  CNY: 'CN¥'
+  CNY: 'CN¥',
+  // Crypto is money here, not a ticker: USDT priced as "$" would be a lie, and a bare
+  // number in a money column reads as dollars. Word-like symbols take U+00A0, as above.
+  USDT: 'USDT\u00a0',
+  USDC: 'USDC\u00a0',
+  BTC: '\u20bf',
+  ETH: '\u039e'
 };
 
 /**
@@ -83,6 +104,10 @@ const SYMBOLS = {
  * three. Hardcoding `digits = 2` invented a half-yen that does not exist.
  */
 function currencyDigits(ccy) {
+  // Stablecoins carry cents like the dollar they track; the majors need the precision a
+  // unit price actually has (1 BTC is not "1.00").
+  if (ccy === 'USDT' || ccy === 'USDC') return 2;
+  if (['BTC', 'ETH', 'SOL', 'BNB', 'LTC', 'BCH', 'AVAX', 'DOT', 'LINK', 'ADA', 'XRP', 'DOGE'].includes(ccy)) return 6;
   try {
     return new Intl.NumberFormat(undefined, { style: 'currency', currency: ccy }).resolvedOptions()
       .minimumFractionDigits;
@@ -291,7 +316,7 @@ export function fmtDate(v) {
   if (!v) return EM_DASH;
   const d = parseDate(v);
   if (!valid(d)) return EM_DASH;
-  return d.toLocaleDateString(intlLocale, { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString(intlLocale, { ...zoneOpts(), month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 /** "Mar 14, 2026, 8:30 AM". */
@@ -300,6 +325,7 @@ export function fmtDateTime(v) {
   const d = parseDate(v);
   if (!valid(d)) return EM_DASH;
   return d.toLocaleString(intlLocale, {
+    ...clockOpts(),
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -314,7 +340,7 @@ export function fmtDay(v) {
   const d = parseDate(v);
   if (!valid(d)) return EM_DASH;
   const thisYear = d.getFullYear() === new Date().getFullYear();
-  return d.toLocaleDateString(intlLocale, { day: 'numeric', month: 'short', ...(thisYear ? {} : { year: 'numeric' }) });
+  return d.toLocaleDateString(intlLocale, { ...zoneOpts(), day: 'numeric', month: 'short', ...(thisYear ? {} : { year: 'numeric' }) });
 }
 
 /** "November" for a month heading in a dated list; the year is added only when it is not this one. */
@@ -323,7 +349,7 @@ export function fmtMonthName(v) {
   const d = parseDate(v);
   if (!valid(d)) return EM_DASH;
   const thisYear = d.getFullYear() === new Date().getFullYear();
-  return d.toLocaleDateString(intlLocale, { month: 'long', ...(thisYear ? {} : { year: 'numeric' }) });
+  return d.toLocaleDateString(intlLocale, { ...zoneOpts(), month: 'long', ...(thisYear ? {} : { year: 'numeric' }) });
 }
 
 /** "8:30 AM". */
@@ -331,7 +357,7 @@ export function fmtTime(v) {
   if (!v) return EM_DASH;
   const d = parseDate(v);
   if (!valid(d)) return EM_DASH;
-  return d.toLocaleTimeString(intlLocale, { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString(intlLocale, { ...clockOpts(), hour: 'numeric', minute: '2-digit' });
 }
 
 /** "Mar 2026", for a chart's month axis. */
@@ -339,7 +365,7 @@ export function fmtMonth(v) {
   if (!v) return EM_DASH;
   const d = parseDate(v);
   if (!valid(d)) return EM_DASH;
-  return d.toLocaleDateString(intlLocale, { month: 'short', year: '2-digit' });
+  return d.toLocaleDateString(intlLocale, { ...zoneOpts(), month: 'short', year: '2-digit' });
 }
 
 /**
@@ -423,9 +449,9 @@ export function fmtStamp(v, now = new Date()) {
   if (!v) return '';
   const d = parseDate(v);
   if (!valid(d)) return '';
-  const time = d.toLocaleTimeString(intlLocale, { hour: 'numeric', minute: '2-digit' });
+  const time = d.toLocaleTimeString(intlLocale, { ...clockOpts(), hour: 'numeric', minute: '2-digit' });
   if (dateKey(d) === dateKey(now)) return time;
-  const opts = { month: 'short', day: 'numeric' };
+  const opts = { ...zoneOpts(), month: 'short', day: 'numeric' };
   if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
   return `${d.toLocaleDateString(intlLocale, opts)}, ${time}`;
 }
