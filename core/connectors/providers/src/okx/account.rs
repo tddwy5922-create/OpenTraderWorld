@@ -642,11 +642,10 @@ fn rows(p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_>, terms: &Terms) 
 #[cfg(test)]
 mod risk_tests {
     use super::PositionRow;
-    use rust_decimal::Decimal;
-    use std::str::FromStr;
 
-    fn dec(s: &str) -> Decimal {
-        Decimal::from_str(s).expect("decimal")
+    /// Decimals as their wire text, so the assertion reads like the payload.
+    fn decs(v: Option<super::Decimal>) -> Option<String> {
+        v.map(|d| d.to_string())
     }
 
     /// A cross perpetual: OKX reports no liquidation price for it, and does report the
@@ -658,12 +657,12 @@ mod risk_tests {
             "ccy":"USDT","markPx":"0.0295","liqPx":"","lever":"3","mgnRatio":"0.0042",
             "fundingFee":"-0.37","notionalUsd":"737.5","adl":"1"}"#;
         let row: PositionRow = serde_json::from_str(raw).expect("parse");
-        assert_eq!(row.mark_px.0, Some(dec("0.0295")));
+        assert_eq!(decs(row.mark_px.0).as_deref(), Some("0.0295"));
         assert_eq!(row.liq_px.0, None, "cross position has no liquidation price");
-        assert_eq!(row.lever.0, Some(dec("3")));
+        assert_eq!(decs(row.lever.0).as_deref(), Some("3"));
         assert_eq!(row.mgn_mode, "cross");
-        assert_eq!(row.mgn_ratio.0, Some(dec("0.0042")));
-        assert_eq!(row.funding_fee.0, Some(dec("-0.37")));
+        assert_eq!(decs(row.mgn_ratio.0).as_deref(), Some("0.0042"));
+        assert_eq!(decs(row.funding_fee.0).as_deref(), Some("-0.37"));
     }
 
     /// An isolated position the venue would liquidate at a real price.
@@ -673,8 +672,8 @@ mod risk_tests {
             "posSide":"long","pos":"20","avgPx":"33.092","markPx":"33.4","liqPx":"21.7",
             "lever":"5","mgnRatio":"0.35","fundingFee":"0.11","ccy":"USDT"}"#;
         let row: PositionRow = serde_json::from_str(raw).expect("parse");
-        assert_eq!(row.liq_px.0, Some(dec("21.7")));
+        assert_eq!(decs(row.liq_px.0).as_deref(), Some("21.7"));
         assert_eq!(row.mgn_mode, "isolated");
-        assert_eq!(row.funding_fee.0, Some(dec("0.11")));
+        assert_eq!(decs(row.funding_fee.0).as_deref(), Some("0.11"));
     }
 }
