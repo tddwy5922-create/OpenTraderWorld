@@ -4,7 +4,8 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import Icon from '$lib/ui/Icon.svelte';
-  import { t } from '$lib/i18n';
+  import { t, locale } from '$lib/i18n';
+  import { labelOf } from '$lib/i18n/labels.js';
   import { pref } from '$lib/prefs.svelte.js';
 
   // Modules by family, in the order the families are shown. A module missing here (a new
@@ -29,8 +30,18 @@
   let cursor = $state(0);
   const recentPref = pref('otw.switcher.recent', []);
 
-  const current = $derived(moduleForPath(page.url.pathname));
-  const modules = $derived(visibleModules($installedIds));
+  // `labelOf` resolves through the locale store with get(), which no $derived tracks:
+  // read $locale here so the switcher re-reads the registry names when the pack arrives,
+  // and hand out fresh objects so the template actually sees the new strings.
+  const current = $derived.by(() => {
+    void $locale;
+    const m = moduleForPath(page.url.pathname);
+    return { ...m, name: labelOf(m.name) };
+  });
+  const modules = $derived.by(() => {
+    void $locale;
+    return visibleModules($installedIds).map((m) => ({ ...m, name: labelOf(m.name) }));
+  });
   const desc = (m) => {
     const s = m.descKey ? $t(m.descKey) : m.home ? $t('switcher.homeDesc') : '';
     return s.replace(/\.$/, '');
