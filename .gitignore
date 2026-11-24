@@ -80,3 +80,6 @@ otw-backup-*.sql
 docs/node_modules/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+
+# Rust build cache for the local container build
+core/.cargohome/

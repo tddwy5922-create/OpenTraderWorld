@@ -1,4 +1,5 @@
 <script>
+  import { labelOf } from '$lib/i18n/labels.js';
   import { moduleById } from '$lib/modules/registry';
   import { installedIds } from '$lib/modules/installed.js';
   import { dashboardApi } from '$lib/modules/dashboard/api.js';
@@ -492,7 +493,7 @@
           aria-current={p.id === doc.activePageId ? 'page' : undefined}
           onclick={() => selectPage(p.id)}
         >
-          {p.tag}
+          {labelOf(p.tag)}
         </button>
       {/each}
     </nav>

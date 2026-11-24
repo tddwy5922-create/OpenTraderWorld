@@ -31,6 +31,7 @@
  */
 
 import { DEFAULT_GRID_COLUMNS } from '$lib/modules/scanner/board.js';
+import { labelOf } from '$lib/i18n/labels.js';
 
 export const COLS = 12;
 
@@ -103,6 +104,25 @@ export const DASHBOARD_PRESETS = [
     modules: ['scanner']
   }
 ];
+
+// 工作区名与一句话说明同样是英文常量，交给 labelOf 按语言渲染。
+for (const p of DASHBOARD_PRESETS) {
+  const en = p.name;
+  const desc = p.description;
+  Object.defineProperty(p, 'name', {
+    get: () => labelOf(en),
+    enumerable: true,
+    configurable: true
+  });
+  if (desc) {
+    Object.defineProperty(p, 'description', {
+      get: () => labelOf(desc),
+      enumerable: true,
+      configurable: true
+    });
+  }
+}
+
 
 const PRESET_IDS = new Set(DASHBOARD_PRESETS.map((preset) => preset.id));
 

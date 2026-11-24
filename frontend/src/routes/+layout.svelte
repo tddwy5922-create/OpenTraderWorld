@@ -3,7 +3,7 @@
   import '$lib/theme/components.css';
   import '$lib/theme/widgets.css';
   import Icon from '$lib/ui/Icon.svelte';
-  import { t, initLocale } from '$lib/i18n';
+  import { t, initLocale, locale } from '$lib/i18n';
   import { api } from '$lib/api';
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
@@ -36,6 +36,7 @@
   import { settingsApi } from '$lib/settings/api.js';
   import { dashboardApi } from '$lib/modules/dashboard/api.js';
   import { DASHBOARD_PRESETS, isDashboardPreset } from '$lib/modules/dashboard/layout.js';
+  import { labelOf } from '$lib/i18n/labels.js';
   import RailEditor from '$lib/ui/RailEditor.svelte';
   import ToolRailEditor from '$lib/ui/ToolRailEditor.svelte';
   import { byName, groupTools } from '$lib/ui/railTools.js';
@@ -59,6 +60,9 @@
 
   // Browser tab title: "OTW - <page name>".
   const pageName = $derived.by(() => {
+    // 语言包异步到达：读一下 locale 让这个 derived 跟着重算，否则注册表里的
+    // name（走 labelOf）会停在首次渲染时的英文。
+    void $locale;
     const path = page.url.pathname;
     if (path === '/setup') return $t('nav.setup');
     if (path === '/login' || path === '/auth/social') return $t('nav.login');
@@ -104,7 +108,7 @@
   let mobileActionsTrigger = $state(null);
 
   const shortcutEntries = $derived([
-    ...workspaceEntries.map((entry) => ({ id: entry.id, label: entry.name, icon: entry.icon, href: dashboardHref(entry.id), group: 'shell.workspace' })),
+    ...workspaceEntries.map((entry) => ({ id: entry.id, label: labelOf(entry.name), icon: entry.icon, href: dashboardHref(entry.id), group: 'shell.workspace' })),
     ...toolEntries.map((entry) => ({ id: entry.id, label: entry.name, icon: entry.icon, href: entry.base, group: 'shell.tools' })),
     { id: 'settings', label: $t('nav.settings'), icon: 'settings', href: '/settings', group: 'shell.tools' }
   ]);
@@ -506,7 +510,7 @@
                   onclick={() => mobile && closeMobileNav(false)}
                 >
                   <Icon name={entry.icon} size={16} strokeWidth={1.8} />
-                  <span>{entry.name}</span>
+                  <span>{labelOf(entry.name)}</span>
                 </a>
               {/each}
             </div>

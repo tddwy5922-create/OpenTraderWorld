@@ -20,6 +20,7 @@
  */
 
 import { DEFAULT_GRID_COLUMNS } from '$lib/modules/scanner/board.js';
+import { labelOf } from '$lib/i18n/labels.js';
 
 export const WIDGETS = [
   {
@@ -574,6 +575,31 @@ export const WIDGETS = [
     loader: () => import('./ResourcesWidget.svelte')
   }
 ];
+
+// 小组件名、说明与变体名是英文常量；labelOf 按当前语言换掉，取不到就保留原文。
+for (const w of WIDGETS) {
+  for (const field of ['label', 'blurb', 'subtitle']) {
+    const en = w[field];
+    if (!en) continue;
+    Object.defineProperty(w, field, {
+      get: () => labelOf(en),
+      enumerable: true,
+      configurable: true
+    });
+  }
+  for (const v of w.variants ?? []) {
+    for (const field of ['label', 'subtitle']) {
+      const en = v[field];
+      if (!en) continue;
+      Object.defineProperty(v, field, {
+        get: () => labelOf(en),
+        enumerable: true,
+        configurable: true
+      });
+    }
+  }
+}
+
 
 export function widgetByType(type) {
   return WIDGETS.find((w) => w.type === type) ?? null;

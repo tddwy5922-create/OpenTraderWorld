@@ -9,6 +9,8 @@
  * modules will be merged in from the backend module registry (otw-modules).
  */
 
+import { labelOf } from '$lib/i18n/labels.js';
+
 export const modules = [
   {
     id: 'dashboard',
@@ -262,6 +264,18 @@ export const modules = [
     descKey: 'module.automator.desc'
   }
 ];
+
+// 注册表里的 name 是英文常量；labelOf 按当前语言给中文（见 i18n/labels.js）。
+// 用 getter 而不是复制一份：标签在渲染时读取，切语言下一次绘制就跟着变。
+for (const m of modules) {
+  const en = m.name;
+  Object.defineProperty(m, 'name', {
+    get: () => labelOf(en),
+    enumerable: true,
+    configurable: true
+  });
+}
+
 
 /** Find the module that owns a given pathname (longest matching base wins). */
 export function moduleForPath(pathname) {
