@@ -458,6 +458,11 @@ pub fn decode(category: Category, venue: &'static str, p: Pending, corr: CorrId,
                     class: (category == Category::Option).then_some(AssetClass::Option),
                     multiplier: None,
                     name,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             vec![chunk(ctx, corr, AccountItems::Positions(out), next_walk(category, settle, page.result.next_page_cursor))]
@@ -476,11 +481,6 @@ pub fn decode(category: Category, venue: &'static str, p: Pending, corr: CorrId,
                             (Some(q), Some(f)) => (q, f, Some("USD".to_string())),
                             _ => return Err(ConnectorError::decode(format!("bybit order realtime: inverse order {} names no price to count its coins", o.order_id))),
                         }
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     }
                     Category::Linear => (qty, filled, Some(SETTLE[settle].to_string())),
                     _ => (qty, filled, None),

@@ -318,6 +318,11 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                     class: class_of(&symbol),
                     multiplier: None,
                     name: None,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             vec![chunk(ctx, corr, AccountItems::Positions(out), None)]
@@ -336,11 +341,6 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                 orders.push(Order {
                     id: id.to_string(),
                     instrument: instrument(&symbol),
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     side: side_of(if orig.is_zero() { left } else { orig }),
                     order_type: kind.to_ascii_lowercase(),
                     qty: Qty(orig.abs()),

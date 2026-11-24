@@ -457,6 +457,11 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                     multiplier: Some(Decimal::ONE),
                     name: Some(label.join("; ")).filter(|l| !l.is_empty()),
                     instrument: InstrumentId::new(VENUE, &symbol),
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out), None)])
@@ -468,11 +473,6 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                 let symbol = o.symbol.to_ascii_uppercase();
                 let c = s.contract(&symbol).ok_or_else(|| unlisted(&symbol))?.clone();
                 if c.sizing == Sizing::Other {
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     tracing::warn!("kraken_futures open orders: {symbol} is a `{}` contract, left out", c.kind);
                     continue;
                 }

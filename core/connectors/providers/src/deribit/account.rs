@@ -429,6 +429,11 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], seen: &mut HashMap<CorrId, 
                     class: name.class(),
                     multiplier: None,
                     name: label,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             vec![chunk(ctx, corr, AccountItems::Positions(out), None)]
@@ -474,11 +479,6 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], seen: &mut HashMap<CorrId, 
                 }
                 let name = Name::of(&t.instrument_name);
                 if name.inverse() {
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     tracing::warn!("deribit fills: {} is an inverse contract, its fill {} is not imported", t.instrument_name, t.trade_id);
                     continue;
                 }

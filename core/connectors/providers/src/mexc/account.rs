@@ -562,6 +562,11 @@ pub fn decode(book: Book, p: Pending, corr: CorrId, body: &[u8], sizes: &HashMap
                     // Already in the coin: one unit is one coin, not one contract.
                     multiplier: Some(Decimal::ONE),
                     name: None,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             vec![chunk(ctx, corr, AccountItems::Positions(out), None)]
@@ -649,11 +654,6 @@ pub fn decode(book: Book, p: Pending, corr: CorrId, body: &[u8], sizes: &HashMap
                             class: None,
                             multiplier: None,
                         });
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     }
                     next_spot(cur, n, from_ms, symbols.len())?
                 }

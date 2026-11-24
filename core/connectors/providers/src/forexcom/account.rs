@@ -225,11 +225,6 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                 }
                 let name = r.market_name.to_ascii_uppercase();
                 out.push(Position {
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     qty: Qty(if r.direction.eq_ignore_ascii_case("sell") { -qty } else { qty }),
                     avg_price: positive(r.price),
                     unrealized_pnl: None,
@@ -241,6 +236,11 @@ pub fn decode(p: Pending, corr: CorrId, body: &[u8], s: &mut Session, ctx: &MapC
                     instrument: id(&name),
                     multiplier: None,
                     name: None,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out))])

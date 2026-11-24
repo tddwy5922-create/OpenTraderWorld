@@ -441,6 +441,11 @@ impl IbkrFlex {
                             class: Some(class_of(&get(r, "assetCategory"))),
                             multiplier: Some(at_least_one(num(r, "multiplier")?.unwrap_or(Decimal::ZERO))),
                             name: Some(get(r, "description")),
+                            liquidation_price: None,
+                            margin_ratio: None,
+                            funding_fee: None,
+                            leverage: None,
+                            margin_mode: None,
                         })
                     })
                     .collect::<Result<Vec<_>, _>>()?;
@@ -507,11 +512,6 @@ impl Mapper for IbkrFlex {
                                 ConnectorError::invalid(format!("unknown time zone `{t}` on this broker account: use a name like Europe/Paris or America/New_York"))
                             })?;
                             (0, Some(tz))
-                            liquidation_price: None,
-                            margin_ratio: None,
-                            funding_fee: None,
-                            leverage: None,
-                            margin_mode: None,
                         }
                     },
                 };

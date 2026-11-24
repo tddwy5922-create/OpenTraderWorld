@@ -411,6 +411,11 @@ pub fn decode(book: Book, p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_
                     class: None,
                     multiplier: None,
                     name: None,
+                    liquidation_price: None,
+                    margin_ratio: None,
+                    funding_fee: None,
+                    leverage: None,
+                    margin_mode: None,
                 });
             }
             Ok(vec![chunk(ctx, corr, AccountItems::Positions(out), None)])
@@ -445,11 +450,6 @@ pub fn decode(book: Book, p: Pending, corr: CorrId, body: &[u8], ctx: &MapCtx<'_
                     side: match b {
                         Book::UsdtFutures => super::trade::hedge_side(&o.pos_side, &o.trade_side).map(Mapped::Known).unwrap_or_else(|| side(&o.side)),
                         Book::Spot => side(&o.side),
-                    liquidation_price: None,
-                    margin_ratio: None,
-                    funding_fee: None,
-                    leverage: None,
-                    margin_mode: None,
                     },
                     order_type: o.order_type,
                     qty: Qty(o.size.0.unwrap_or_default()),
